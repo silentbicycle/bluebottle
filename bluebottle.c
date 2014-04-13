@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2014 Scott Vokes
+ * Copyright (c) 2014 Scott Vokes <vokes.s@gmail.com>
  * 
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -21,10 +21,13 @@
  * distribution.
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "bluebottle.h"
 
+/* Allocate and initialize a bluebottle handle according to the config.
+ * Returns NULL on error. */
 bluebottle *bluebottle_new(struct bluebottle_cfg *config) {
     bluebottle *s = NULL;
     if (config == NULL) { goto fail; }
@@ -39,6 +42,8 @@ fail:
     return NULL;
 }
 
+/* Initialize a bluebottle handle according to the config.
+ * Returns true on success, false on error. */
 bool bluebottle_init(bluebottle *s, struct bluebottle_cfg *config) {
     if ((config->in_buf == NULL && config->in_buf_size != 0)
         || (config->out_buf == NULL && config->out_buf_size != 0)) {
@@ -59,6 +64,8 @@ bool bluebottle_init(bluebottle *s, struct bluebottle_cfg *config) {
     return true;
 }
 
+/* Enqueue an outgoing message, to be clocked out by
+ * bluebottle_write_step. */
 bluebottle_write_enqueue_res bluebottle_write_enqueue(bluebottle *s,
     uint8_t *msg, size_t size) {
     if (s == NULL) { return BLUEBOTTLE_WRITE_ENQUEUE_ERROR_NULL; }
@@ -94,6 +101,7 @@ bool bluebottle_write_abort(bluebottle *s) {
 
 /* Step the current write, if any, and indicate whether the
  * TX line should be logic low, high, or left high after completion.
+ * 
  * Must be called at a regular interval, according to the known
  * baud rate. */
 bluebottle_write_step_res bluebottle_write_step(bluebottle *s) {
@@ -132,15 +140,15 @@ bluebottle_write_step_res bluebottle_write_step(bluebottle *s) {
 
 /* Sink a bit read from the RX line. If the transfer has completed,
  * a callback (if registered) will be called with the payload.
+ * 
  * Must be called at a regular interval, according to the known baud rate.*/
 bluebottle_read_sink_res bluebottle_read_sink(bluebottle *s, bool bit) {
     if (s == NULL) { return BLUEBOTTLE_READ_SINK_ERROR_NULL; }
 
-    //printf("MODE %d, bit %d\n", s->in.mode, bit);
     switch (s->in.mode) {
     default:
     case MODE_DONE:
-        if (bit) {                        /* still idle */
+        if (bit) {              /* still idle */
             return BLUEBOTTLE_READ_SINK_OK;
         }
         if (s->in.buf == NULL) {
@@ -187,4 +195,6 @@ bluebottle_read_sink_res bluebottle_read_sink(bluebottle *s, bool bit) {
     }
 }
 
+/* Free the bluebottle struct.
+ * Note: Does NOT free the buffer(s) passed to it on init. */
 void bluebottle_free(bluebottle *s) { free(s); }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2014 Scott Vokes
+ * Copyright (c) 2014 Scott Vokes <vokes.s@gmail.com>
  * 
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -31,14 +31,14 @@
 /* Bit-bang TTL serial IO. Currently assumes LSB, 8N1. */
 
 /* Callback for when serial data has been successfully read.
- * UDATA can be NULL. */
+ * UDATA is the pointer provided during bluebottle_init/new, or NULL. */
 typedef void bluebottle_read_cb(uint8_t *buf, size_t size, void *udata);
 
 typedef enum {
-    MODE_DONE,
-    MODE_START_BIT,
-    MODE_BITS,
-    MODE_STOP_BIT,
+    MODE_DONE,                  /* not currently writing */
+    MODE_START_BIT,             /* on start bit */
+    MODE_BITS,                  /* on payload bits */
+    MODE_STOP_BIT,              /* on stop bit */
 } buf_mode;
 
 typedef struct {
@@ -62,14 +62,14 @@ typedef struct bluebottle {
  * TX or RX only), in which case the sizes must be NULL.
  *
  * READ_UDATA is an argument that wil be passed along to
- * the optional READ_CB for if  data buffer is received. */
+ * the optional READ_CB for if data buffer is received. */
 struct bluebottle_cfg {
     uint8_t *in_buf;
     size_t in_buf_size;
     uint8_t *out_buf;
     size_t out_buf_size;
-    bluebottle_read_cb *read_cb;
-    void *read_udata;
+    bluebottle_read_cb *read_cb; /* callback for successful read */
+    void *read_udata;            /* closure for successful read */
 };
 
 /* Initialize a bluebottle handle according to the config.
@@ -87,7 +87,7 @@ typedef enum {
     BLUEBOTTLE_WRITE_ENQUEUE_ERROR_BUSY = -3,
 } bluebottle_write_enqueue_res;
 
-/* Enqueue an outgoing message to be clocked out by
+/* Enqueue an outgoing message, to be clocked out by
  * bluebottle_write_step. */
 bluebottle_write_enqueue_res bluebottle_write_enqueue(bluebottle *s,
     uint8_t *msg, size_t size);
@@ -100,13 +100,14 @@ bool bluebottle_write_busy(bluebottle *s);
 bool bluebottle_write_abort(bluebottle *s);
 
 typedef enum {
-    BLUEBOTTLE_WRITE_STEP_LOW,
-    BLUEBOTTLE_WRITE_STEP_HIGH,
+    BLUEBOTTLE_WRITE_STEP_LOW,  /* logic low */
+    BLUEBOTTLE_WRITE_STEP_HIGH, /* logic high */
     BLUEBOTTLE_WRITE_STEP_ERROR_NULL = -1,
 } bluebottle_write_step_res;
 
 /* Step the current write, if any, and indicate whether the
  * TX line should be logic low or high.
+ * 
  * Must be called at a regular interval, according to the known
  * baud rate. */
 bluebottle_write_step_res bluebottle_write_step(bluebottle *s);
@@ -121,6 +122,7 @@ typedef enum {
 
 /* Sink a bit read from the RX line. If the transfer has completed,
  * a callback (if registered) will be called with the payload.
+ * 
  * Must be called at a regular interval, according to the known baud rate.*/
 bluebottle_read_sink_res bluebottle_read_sink(bluebottle *s, bool bit);
 
