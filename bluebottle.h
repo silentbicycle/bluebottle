@@ -30,6 +30,10 @@
 
 /* Bit-bang TTL serial IO. Currently assumes LSB, 8N1. */
 
+#define BLUEBOTTLE_VERSION_MAJOR 0
+#define BLUEBOTTLE_VERSION_MINOR 1
+#define BLUEBOTTLE_VERSION_PATCH 0
+
 /* Callback for when serial data has been successfully read.
  * UDATA is the pointer provided during bluebottle_init/new, or NULL. */
 typedef void bluebottle_read_cb(uint8_t *buf, size_t size, void *udata);
