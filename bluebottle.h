@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Bit-bang TTL serial IO. Currently assumes LSB, 8N1. */
+/* Bit-bang async serial IO (UARTs). Currently assumes LSB, 8N1. */
 
 #define BLUEBOTTLE_VERSION_MAJOR 0
 #define BLUEBOTTLE_VERSION_MINOR 1

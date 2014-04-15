@@ -1,4 +1,4 @@
-bluebottle -- a C library for bit-banging TTL async serial communication.
+A C library for bit-banging async serial communication (UARTs).
 
 This is useful if you have an inexpensive microcontroller (such as an
 [ATtiny85][a85]) that does not have built-in hardware support for

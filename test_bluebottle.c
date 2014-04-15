@@ -17,7 +17,7 @@ TEST bluebottle_new_should_allocate(void) {
     PASS();
 }
 
-static uint8_t msg[] = "such bits, very TTL, wow";
+static uint8_t msg[] = "such bits, very UART, wow";
 
 TEST enqueue_and_step_through_msg(void) {
     static uint8_t out_buf[64];
